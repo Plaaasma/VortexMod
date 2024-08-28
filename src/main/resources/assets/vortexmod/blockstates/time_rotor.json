@@ -1,0 +1,56 @@
+{
+  "variants": {
+    "enabled=false,facing=down": {
+      "model": "vortexmod:block/time_rotor/block",
+      "x": 270,
+      "y": 90
+    },
+    "enabled=false,facing=up": {
+      "model": "vortexmod:block/time_rotor/block",
+      "x": 90,
+      "y": 90
+    },
+    "enabled=false,facing=north": {
+      "model": "vortexmod:block/time_rotor/block",
+      "y": 180
+    },
+    "enabled=false,facing=south": {
+      "model": "vortexmod:block/time_rotor/block",
+      "y": 0
+    },
+    "enabled=false,facing=west": {
+      "model": "vortexmod:block/time_rotor/block",
+      "y": 90
+    },
+    "enabled=false,facing=east": {
+      "model": "vortexmod:block/time_rotor/block",
+      "y": 270
+    },
+    "enabled=true,facing=down": {
+      "model": "vortexmod:block/time_rotor/block_enabled",
+      "x": 270,
+      "y": 90
+    },
+    "enabled=true,facing=up": {
+      "model": "vortexmod:block/time_rotor/block_enabled",
+      "x": 90,
+      "y": 90
+    },
+    "enabled=true,facing=north": {
+      "model": "vortexmod:block/time_rotor/block_enabled",
+      "y": 180
+    },
+    "enabled=true,facing=south": {
+      "model": "vortexmod:block/time_rotor/block_enabled",
+      "y": 0
+    },
+    "enabled=true,facing=west": {
+      "model": "vortexmod:block/time_rotor/block_enabled",
+      "y": 90
+    },
+    "enabled=true,facing=east": {
+      "model": "vortexmod:block/time_rotor/block_enabled",
+      "y": 270
+    }
+  }
+}

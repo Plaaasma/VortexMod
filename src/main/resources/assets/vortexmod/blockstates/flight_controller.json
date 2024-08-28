@@ -1,0 +1,11 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "vortexmod:block/flight_controller/block",
+      "y": 90
+    },
+    "axis=z": {
+      "model": "vortexmod:block/flight_controller/block"
+    }
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "variants": {
+    "facing=down": {
+      "model": "vortexmod:block/flight_computer/block",
+      "x": 270,
+      "y": 90
+    },
+    "facing=up": {
+      "model": "vortexmod:block/flight_computer/block",
+      "x": 90,
+      "y": 90
+    },
+    "facing=north": {
+      "model": "vortexmod:block/flight_computer/block",
+      "y": 180
+    },
+    "facing=south": {
+      "model": "vortexmod:block/flight_computer/block",
+      "y": 0
+    },
+    "facing=west": {
+      "model": "vortexmod:block/flight_computer/block",
+      "y": 90
+    },
+    "facing=east": {
+      "model": "vortexmod:block/flight_computer/block",
+      "y": 270
+    }
+  }
+}

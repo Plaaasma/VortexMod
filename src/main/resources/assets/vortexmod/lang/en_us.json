@@ -1,0 +1,14 @@
+{
+  "block.vortexmod.time_rotor": "Time Rotor",
+  "block.vortexmod.flight_computer": "Flight Computer",
+  "block.vortexmod.flight_controller": "Flight Controller",
+
+  "vortexmod.ponder.time_rotor.header": "Powering the TARDIS with a time rotor!",
+  "vortexmod.ponder.time_rotor.text_1": "The Time Rotor is responsible for providing lift and communicating with the time vortex.",
+  "vortexmod.ponder.time_rotor.text_2": "It requires atleast 32 RPM to operate.",
+  "vortexmod.ponder.time_rotor.text_3": "The Time Rotors strength is determined by the RPM input into the system. You can have multiple of them in one TARDIS to multiply the strength as well.",
+
+  "screen.vortexmod.flight_computer_gui_title": "Flight Computer",
+
+  "itemGroup.vortexmod.main": "Create: The Time Vortex"
+}
