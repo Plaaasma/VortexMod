@@ -6,23 +6,23 @@
 
   "vortexmod.ponder.time_rotor.header": "Powering the TARDIS with a time rotor!",
   "vortexmod.ponder.time_rotor.text_1": "The Time Rotor is responsible for providing thrust and stabilizing the TARDIS.",
-  "vortexmod.ponder.time_rotor.text_2": "It requires atleast 32 RPM to operate, though increasing the RPM makes it stronger.",
+  "vortexmod.ponder.time_rotor.text_2": "It requires at least 32 RPM to operate, though increasing the RPM makes it stronger.",
   "vortexmod.ponder.time_rotor.text_3": "You can have multiple of them in one TARDIS to increase the strength as well.",
 
   "vortexmod.ponder.flight_computer.header": "Managing the TARDIS with the Flight Computer!",
   "vortexmod.ponder.flight_computer.text_1": "The Flight Computer is essential for assembling and disassembling the TARDIS.",
   "vortexmod.ponder.flight_computer.text_2": "It displays and controls all the variables in the TARDIS such as the target location.",
-  "vortexmod.ponder.flight_computer.text_3": "It requires atleast 32 RPM to operate.",
+  "vortexmod.ponder.flight_computer.text_3": "It requires at least 32 RPM to operate.",
 
   "vortexmod.ponder.flight_controller.header": "Flying the TARDIS with the Flight Controller!",
   "vortexmod.ponder.flight_controller.text_1": "The Flight Controller is the actual control panel for the TARDIS.",
   "vortexmod.ponder.flight_controller.text_2": "Right clicking it will mount you onto the TARDIS where you can fly using your movement keys, your jump bind, and your descent bind (Different than crouch).",
-  "vortexmod.ponder.flight_controller.text_3": "It requires atleast 32 RPM to operate.",
+  "vortexmod.ponder.flight_controller.text_3": "It requires at least 32 RPM to operate.",
 
   "vortexmod.ponder.space_circuit.header": "How to fold the fabric of space!",
   "vortexmod.ponder.space_circuit.text_1": "The Space Circuit allows you to teleport to the target coords once you get to 39.3 m/s (88 mph).",
   "vortexmod.ponder.space_circuit.text_2": "You can toggle it on and off by powering it with a redstone signal.",
-  "vortexmod.ponder.space_circuit.text_3": "It requires atleast 32 RPM to operate.",
+  "vortexmod.ponder.space_circuit.text_3": "It requires at least 32 RPM to operate.",
 
   "screen.vortexmod.flight_computer_gui_title": "Flight Computer",
 
