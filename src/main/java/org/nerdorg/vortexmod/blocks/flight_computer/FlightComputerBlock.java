@@ -87,6 +87,7 @@ public class FlightComputerBlock extends DirectionalKineticBlock implements IBE<
 
     public FlightComputerBlock(Properties properties) {
         super(properties);
+        this.registerDefaultState(this.stateDefinition.any().setValue(ENABLED, Boolean.FALSE));
     }
 
     @Override

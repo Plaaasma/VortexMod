@@ -65,6 +65,7 @@ public class TimeRotorBlock extends DirectionalKineticBlock implements IBE<TimeR
 
     public TimeRotorBlock(Properties properties) {
         super(properties);
+        this.registerDefaultState(this.stateDefinition.any().setValue(ENABLED, Boolean.FALSE));
     }
 
     @Override

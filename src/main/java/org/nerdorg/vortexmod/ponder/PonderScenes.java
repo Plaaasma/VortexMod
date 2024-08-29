@@ -67,6 +67,7 @@ public class PonderScenes {
             scene.idle(5);
             scene.world.showSection(util.select.position(i, 1, 2), Direction.DOWN);
             scene.world.showSection(util.select.position(i, 2, 2), Direction.DOWN);
+            scene.world.showSection(util.select.position(i, 3, 2), Direction.DOWN);
         }
 
         scene.idle(10);

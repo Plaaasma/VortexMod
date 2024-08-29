@@ -18,6 +18,7 @@ import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraftforge.network.NetworkDirection;
 import org.joml.*;
 import org.nerdorg.vortexmod.VortexMod;
+import org.nerdorg.vortexmod.config.Config;
 import org.valkyrienskies.core.api.ships.ServerShip;
 import org.valkyrienskies.core.apigame.world.IPlayer;
 import org.valkyrienskies.core.util.datastructures.DenseBlockPosSet;
@@ -31,6 +32,7 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
+import static org.valkyrienskies.mod.util.RelocationUtilKt.relocateBlock;
 import static org.valkyrienskies.mod.util.RelocationUtilKt.updateBlock;
 
 public class ShipAssembler {
@@ -156,8 +158,9 @@ public class ShipAssembler {
                             BlockState rotatedState = rotateBlockState(state, rotation);
 
                             toUpdate.add(new Triple<>(inShipPos, inWorldBlockPos, state));
-                            level.setBlock(inShipPos, Blocks.AIR.defaultBlockState(), 3 | 16);
-                            level.setBlock(inWorldBlockPos, rotatedState, 3 | 16);
+//                            level.setBlock(inShipPos, Blocks.AIR.defaultBlockState(), 3 | 16);
+//                            level.setBlock(inWorldBlockPos, rotatedState, 3 | 16);
+                            relocateBlock(level, inShipPos, inWorldBlockPos, false, null, rotation);
                         }
                     }
                 }
@@ -210,23 +213,23 @@ public class ShipAssembler {
                 });
             }
 
-            if (blocks.size() > 1024) {
+            if (blocks.size() > Config.MAX_ASSEMBLY_BLOCKS.get()) {
                 VortexMod.LOGGER.info("Stopped ship assembly due to too many blocks");
                 return false;
             }
         }
 
-        VortexMod.LOGGER.info("Assembled ship with " + blocks.size() + " blocks, out of " + 1024 + " allowed");
+        VortexMod.LOGGER.info("Assembled ship with " + blocks.size() + " blocks, out of " + Config.MAX_ASSEMBLY_BLOCKS.get() + " allowed");
 
         return true;
     }
 
     private static void directions(BlockPos center, Consumer<BlockPos> lambda) {
-        //if (!EurekaConfig.SERVER.diagonals) {
-        for (Direction direction : Direction.values()) {
-            lambda.accept(center.relative(direction));
+        if (!Config.ASSEMBLY_DIAGONALS.get()) {
+            for (Direction direction : Direction.values()) {
+                lambda.accept(center.relative(direction));
+            }
         }
-        //}
 
         for (int x = -1; x <= 1; x++) {
             for (int y = -1; y <= 1; y++) {

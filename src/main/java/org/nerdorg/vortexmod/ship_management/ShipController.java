@@ -10,6 +10,7 @@ import org.joml.primitives.AABBdc;
 import org.nerdorg.vortexmod.VortexMod;
 import org.nerdorg.vortexmod.blocks.time_rotor.TimeRotorBlock;
 import org.nerdorg.vortexmod.blocks.time_rotor.TimeRotorBlockEntity;
+import org.nerdorg.vortexmod.config.Config;
 import org.valkyrienskies.core.api.ships.PhysShip;
 import org.valkyrienskies.core.api.ships.ServerShip;
 import org.valkyrienskies.core.api.ships.ServerTickListener;
@@ -175,11 +176,11 @@ public class ShipController implements ShipForcesInducer, ServerTickListener {
             // 39.33 m/s = 88 mph
             double exact_speed = physShipImpl.getPoseVel().getVel().length();
             this.cspeed = exact_speed;
-            if (exact_speed >= 39.33 && this.space_circuit) {
+            if (exact_speed >= Config.TELEPORTATION_SPEED_THRESHOLD.get() && this.space_circuit) {
                 TardisInfo tardisInfo = this.serverShip.getAttachment(TardisInfo.class);
                 if (tardisInfo != null) {
                     double distanceToTarget = this.serverShip.getTransform().getPositionInWorld().distance(tardisInfo.target_location.getX(), tardisInfo.target_location.getY(), tardisInfo.target_location.getZ());
-                    if (distanceToTarget > 100) {
+                    if (distanceToTarget > Config.MIN_TARGET_DISTANCE.get()) {
                         ShipTeleportDataImpl shipTeleportData = new ShipTeleportDataImpl(
                                 (Vector3dc) new Vector3d(tardisInfo.target_location.getX(), tardisInfo.target_location.getY(), tardisInfo.target_location.getZ()),
                                 JomlUtils.toQuaternion(tardisInfo.target_rotation),
@@ -209,8 +210,8 @@ public class ShipController implements ShipForcesInducer, ServerTickListener {
     private Vector3d getPlayerUpwardVel(ControlData control, double mass) {
         if (control.upImpulse != 0.0f) {
             double multiplier = (control.upImpulse < 0.0f)
-                    ? 8
-                    : 4
+                    ? Config.DESCEND_SPEED.get()
+                    : Config.ASCEND_SPEED.get()
                     + smoothing(2.0, 5.5, 4);
 
             return new Vector3d(0.0, 1.0, 0.0).mul(control.upImpulse).mul(multiplier);
@@ -242,8 +243,8 @@ public class ShipController implements ShipForcesInducer, ServerTickListener {
 
         double largestDistance = max(0.5, min(dist, 4));
 
-        double maxLinearAcceleration = 50;
-        double maxLinearSpeed = 100 + extraForceAngular;
+        double maxLinearAcceleration = Config.TURN_ACCELERATION.get();
+        double maxLinearSpeed = Config.MAX_TURN_SPEED.get() + extraForceAngular;
 
         // acceleration = alpha * r, therefore: maxAlpha = maxAcceleration / r
         double maxOmegaY = maxLinearSpeed / largestDistance;
@@ -269,7 +270,7 @@ public class ShipController implements ShipForcesInducer, ServerTickListener {
         Vector3d rotationVector = new Vector3d(rotationVectorInt.getX(), rotationVectorInt.getY(), rotationVectorInt.getZ());
         physShip.getPoseVel().transformDirection(rotationVector);
         rotationVector.y = 0;
-        rotationVector.mul(strength * 0.1);
+        rotationVector.mul(strength * Config.TURN_BANKING.get());
 
         rotationVector = physShip.getPoseVel().getRot().transform(
                 moiTensor.transform(
@@ -291,12 +292,7 @@ public class ShipController implements ShipForcesInducer, ServerTickListener {
 
 
     private Vector3d getPlayerForwardVel(ControlData control, PhysShipImpl physShip) {
-        double linearMaxMass = 10000;
-        double linearMassScaling = 2.0E-4;
-        double linearBaseMass = 50;
-        double baseSpeed = 0;
-        double maxBaseSpeed = 60;
-        double maxCasualSpeed = 100;
+        double baseSpeed = Config.BASE_SPEED.get();
 
         List<TimeRotorBlockEntity> blocksToRemove = new ArrayList<>();
 
@@ -311,10 +307,10 @@ public class ShipController implements ShipForcesInducer, ServerTickListener {
         }
 
         for (TimeRotorBlockEntity timeRotorBlockEntity : timeRotorBlocks) {
-            baseSpeed += 13.2 * (abs(timeRotorBlockEntity.getSpeed()) / 64);
+            baseSpeed += Config.ROTOR_POWER.get() * (abs(timeRotorBlockEntity.getSpeed()) / 64);
         }
 
-        baseSpeed = min(baseSpeed, maxBaseSpeed);
+        baseSpeed = min(baseSpeed, Config.MAX_BASE_SPEED.get());
 
         double scaledMass = physShip.getInertia().getShipMass() * 5;
         Vector3dc vel = physShip.getPoseVel().getVel();
@@ -327,8 +323,8 @@ public class ShipController implements ShipForcesInducer, ServerTickListener {
         forwardVector.normalize();
 
         double s = 1 / smoothingATanMax(
-                linearMaxMass,
-                physShip.getInertia().getShipMass() * linearMassScaling + linearBaseMass
+                Config.LINEAR_MAX_MASS.get(),
+                physShip.getInertia().getShipMass() * Config.LINEAR_MASS_SCALING.get() + Config.LINEAR_BASE_MASS.get()
         );
 
         double maxSpeed = 50;
@@ -348,7 +344,7 @@ public class ShipController implements ShipForcesInducer, ServerTickListener {
             extraForceLinear += (float) (boost + boost * boost * 1.0E-6);
 
             // This is the maximum speed we want to go in any scenario (when not sprinting)
-            Vector3d idealForwardVel = new Vector3d(forwardVector).mul(maxCasualSpeed);
+            Vector3d idealForwardVel = new Vector3d(forwardVector).mul(Config.MAX_CASUAL_SPEED.get());
             Vector3d idealForwardForce = new Vector3d(idealForwardVel).sub(velOrthogonalToPlayerUp).mul(scaledMass);
 
             Vector3d extraForceNeeded = new Vector3d(idealForwardForce).sub(forwardForce);

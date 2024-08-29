@@ -181,42 +181,42 @@ public class FlightComputerGuiScreen extends AbstractContainerScreen<FlightCompu
             x = Double.parseDouble(x_value);
         }
         else {
-            return;
+            x = this.getMenu().blockEntity.targetPos.getX();
         }
         String y_value = this.targetY.getValue();
         if (y_value.matches("-?\\d+")) {
             y = Double.parseDouble(y_value);
         }
         else {
-            return;
+            y = this.getMenu().blockEntity.targetPos.getY();
         }
         String z_value = this.targetZ.getValue();
         if (z_value.matches("-?\\d+")) {
             z = Double.parseDouble(z_value);
         }
         else {
-            return;
+            z = this.getMenu().blockEntity.targetPos.getZ();
         }
         String x_rot_value = this.rotX.getValue();
         if (x_rot_value.matches("-?\\d+")) {
             x_rot = Double.parseDouble(x_rot_value);
         }
         else {
-            return;
+            x_rot = this.getMenu().blockEntity.targetRotation.x();
         }
         String y_rot_value = this.rotY.getValue();
         if (y_rot_value.matches("-?\\d+")) {
             y_rot = Double.parseDouble(y_rot_value);
         }
         else {
-            return;
+            y_rot = this.getMenu().blockEntity.targetRotation.y();
         }
         String z_rot_value = this.rotZ.getValue();
         if (z_rot_value.matches("-?\\d+")) {
             z_rot = Double.parseDouble(z_rot_value);
         }
         else {
-            return;
+            z_rot = this.getMenu().blockEntity.targetRotation.z();
         }
 
         VortexMod.Network.sendToServer(new SetTargetPacket(this.getMenu().blockEntity.getBlockPos(), new BlockPos((int) x, (int) y, (int) z), x_rot, y_rot, z_rot));
