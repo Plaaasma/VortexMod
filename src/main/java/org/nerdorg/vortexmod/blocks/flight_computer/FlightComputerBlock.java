@@ -15,6 +15,8 @@ import net.minecraft.world.MenuProvider;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ContainerLevelAccess;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -34,11 +36,13 @@ import org.jetbrains.annotations.Nullable;
 import org.nerdorg.vortexmod.index.VMBlockEntities;
 import org.nerdorg.vortexmod.shapes.VMShapes;
 
+import java.util.List;
+
 public class FlightComputerBlock extends DirectionalKineticBlock implements IBE<FlightComputerBlockEntity>, IRotate {
 
     public static final BooleanProperty ENABLED = BlockStateProperties.ENABLED;
 
-    public static final VoxelShaper COMPUTER_SHAPE = VMShapes.shape(4, 0, 4, 12, 16, 12).forDirectional();
+    public static final VoxelShaper COMPUTER_SHAPE = VMShapes.shape(0, 1, 0, 16, 16, 16).forDirectional();
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {

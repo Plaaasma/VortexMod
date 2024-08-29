@@ -1,7 +1,6 @@
 package org.nerdorg.vortexmod;
 
 import com.mojang.logging.LogUtils;
-import com.simibubi.create.content.fluids.tank.BoilerHeaters;
 import com.simibubi.create.content.kinetics.BlockStressValues;
 import com.simibubi.create.foundation.data.CreateRegistrate;
 import com.simibubi.create.foundation.item.ItemDescription;
@@ -9,27 +8,12 @@ import com.simibubi.create.foundation.item.KineticStats;
 import com.simibubi.create.foundation.item.TooltipHelper;
 import com.simibubi.create.foundation.item.TooltipModifier;
 import com.simibubi.create.infrastructure.config.AllConfigs;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.food.FoodProperties;
-import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.CreativeModeTabs;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockBehaviour;
-import net.minecraft.world.level.material.MapColor;
-import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
-import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
@@ -41,14 +25,11 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.simple.SimpleChannel;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
 import org.nerdorg.vortexmod.config.Config;
 import org.nerdorg.vortexmod.gui.flight_computer.FlightComputerGuiScreen;
 import org.nerdorg.vortexmod.index.*;
-import org.nerdorg.vortexmod.packets.AssemblePacket;
-import org.nerdorg.vortexmod.packets.DisassemblePacket;
+import org.nerdorg.vortexmod.packets.c2s.*;
+import org.nerdorg.vortexmod.packets.s2c.SyncComputerInfoPacket;
 import org.slf4j.Logger;
 
 // The value here should match an entry in the META-INF/mods.toml file
@@ -119,12 +100,16 @@ public class VortexMod {
         ItemBlockRenderTypes.setRenderLayer(VMBlocks.TIME_ROTOR.get(), cutout);
         ItemBlockRenderTypes.setRenderLayer(VMBlocks.FLIGHT_COMPUTER.get(), cutout);
         ItemBlockRenderTypes.setRenderLayer(VMBlocks.FLIGHT_CONTROLLER.get(), cutout);
+        ItemBlockRenderTypes.setRenderLayer(VMBlocks.SPACE_CIRCUIT.get(), cutout);
     }
 
     public void postInit(FMLLoadCompleteEvent evt) {
         Network.registerMessage(0, AssemblePacket.class, AssemblePacket::encode, AssemblePacket::decode, AssemblePacket::handle);
         Network.registerMessage(1, DisassemblePacket.class, DisassemblePacket::encode, DisassemblePacket::decode, DisassemblePacket::handle);
-
+        Network.registerMessage(2, SetTargetPacket.class, SetTargetPacket::encode, SetTargetPacket::decode, SetTargetPacket::handle);
+        Network.registerMessage(3, ToggleStabilizerPacket.class, ToggleStabilizerPacket::encode, ToggleStabilizerPacket::decode, ToggleStabilizerPacket::handle);
+        Network.registerMessage(4, ToggleAntiGravPacket.class, ToggleAntiGravPacket::encode, ToggleAntiGravPacket::decode, ToggleAntiGravPacket::handle);
+        Network.registerMessage(5, SyncComputerInfoPacket.class, SyncComputerInfoPacket::encode, SyncComputerInfoPacket::decode, SyncComputerInfoPacket::handle);
         System.out.println("Create: The Time Vortex Initialized!");
     }
 }

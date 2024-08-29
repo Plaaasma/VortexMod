@@ -9,6 +9,9 @@ import org.nerdorg.vortexmod.blocks.flight_computer.FlightComputerRenderer;
 import org.nerdorg.vortexmod.blocks.flight_controller.FlightControllerBlockEntity;
 import org.nerdorg.vortexmod.blocks.flight_controller.FlightControllerInstance;
 import org.nerdorg.vortexmod.blocks.flight_controller.FlightControllerRenderer;
+import org.nerdorg.vortexmod.blocks.space_circuit.SpaceCircuitBlockEntity;
+import org.nerdorg.vortexmod.blocks.space_circuit.SpaceCircuitInstance;
+import org.nerdorg.vortexmod.blocks.space_circuit.SpaceCircuitRenderer;
 import org.nerdorg.vortexmod.blocks.time_rotor.TimeRotorBlockEntity;
 import org.nerdorg.vortexmod.blocks.time_rotor.TimeRotorInstance;
 import org.nerdorg.vortexmod.blocks.time_rotor.TimeRotorRenderer;
@@ -33,6 +36,13 @@ public class VMBlockEntities {
             .instance(() -> FlightControllerInstance::new)
             .validBlocks(VMBlocks.FLIGHT_CONTROLLER)
             .renderer(() -> FlightControllerRenderer::new)
+            .register();
+
+    public static final BlockEntityEntry<SpaceCircuitBlockEntity> SPACE_CIRCUIT = VortexMod.REGISTRATE
+            .blockEntity("space_circuit", SpaceCircuitBlockEntity::new)
+            .instance(() -> SpaceCircuitInstance::new)
+            .validBlocks(VMBlocks.SPACE_CIRCUIT)
+            .renderer(() -> SpaceCircuitRenderer::new)
             .register();
 
     public static void register() {}

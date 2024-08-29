@@ -1,0 +1,56 @@
+{
+  "variants": {
+    "powered=false,facing=down": {
+      "model": "vortexmod:block/space_circuit/block",
+      "x": 270,
+      "y": 90
+    },
+    "powered=false,facing=up": {
+      "model": "vortexmod:block/space_circuit/block",
+      "x": 90,
+      "y": 90
+    },
+    "powered=false,facing=north": {
+      "model": "vortexmod:block/space_circuit/block",
+      "y": 180
+    },
+    "powered=false,facing=south": {
+      "model": "vortexmod:block/space_circuit/block",
+      "y": 0
+    },
+    "powered=false,facing=west": {
+      "model": "vortexmod:block/space_circuit/block",
+      "y": 90
+    },
+    "powered=false,facing=east": {
+      "model": "vortexmod:block/space_circuit/block",
+      "y": 270
+    },
+    "powered=true,facing=down": {
+      "model": "vortexmod:block/space_circuit/block_active",
+      "x": 270,
+      "y": 90
+    },
+    "powered=true,facing=up": {
+      "model": "vortexmod:block/space_circuit/block_active",
+      "x": 90,
+      "y": 90
+    },
+    "powered=true,facing=north": {
+      "model": "vortexmod:block/space_circuit/block_active",
+      "y": 180
+    },
+    "powered=true,facing=south": {
+      "model": "vortexmod:block/space_circuit/block_active",
+      "y": 0
+    },
+    "powered=true,facing=west": {
+      "model": "vortexmod:block/space_circuit/block_active",
+      "y": 90
+    },
+    "powered=true,facing=east": {
+      "model": "vortexmod:block/space_circuit/block_active",
+      "y": 270
+    }
+  }
+}

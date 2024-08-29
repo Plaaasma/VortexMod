@@ -1,9 +1,8 @@
-package org.nerdorg.vortexmod.packets;
+package org.nerdorg.vortexmod.packets.c2s;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkEvent;
 import org.nerdorg.vortexmod.blocks.flight_computer.FlightComputerBlockEntity;
 

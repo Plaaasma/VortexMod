@@ -2,20 +2,27 @@ package org.nerdorg.vortexmod.ship_management;
 
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 import org.joml.*;
 import org.joml.primitives.AABBdc;
 import org.nerdorg.vortexmod.VortexMod;
+import org.nerdorg.vortexmod.blocks.time_rotor.TimeRotorBlock;
+import org.nerdorg.vortexmod.blocks.time_rotor.TimeRotorBlockEntity;
 import org.valkyrienskies.core.api.ships.PhysShip;
 import org.valkyrienskies.core.api.ships.ServerShip;
 import org.valkyrienskies.core.api.ships.ServerTickListener;
 import org.valkyrienskies.core.api.ships.ShipForcesInducer;
 import org.valkyrienskies.core.api.ships.properties.ShipTransform;
+import org.valkyrienskies.core.impl.game.ShipTeleportDataImpl;
 import org.valkyrienskies.core.impl.game.ships.PhysShipImpl;
 import org.valkyrienskies.mod.api.SeatedControllingPlayer;
+import org.valkyrienskies.mod.common.VSGameUtilsKt;
 
 import java.lang.Math;
+import java.util.ArrayList;
+import java.util.List;
 
 import static java.lang.Math.*;
 
@@ -23,12 +30,18 @@ public class ShipController implements ShipForcesInducer, ServerTickListener {
     public ServerShip serverShip;
     public boolean aligning;
     public boolean disassembling;
+    public boolean space_circuit;
+    public boolean antigrav;
+    public boolean stabilizer;
+    public double cspeed;
 
     private float extraForceLinear = 0;
     private float extraForceAngular = 0;
 
     private float powerLinear = 0;
     private float powerAngular = 0;
+
+    public List<TimeRotorBlockEntity> timeRotorBlocks = new ArrayList<>();
 
     private float GRAVITY = -10;
 
@@ -92,8 +105,8 @@ public class ShipController implements ShipForcesInducer, ServerTickListener {
         AxisAngle4d invRotationAxisAngle = new AxisAngle4d(invRotation);
 
         // Floor makes a number 0 to 3, which corresponds to direction
-        int alignTarget = (int) Math.floor((invRotationAxisAngle.angle / (Math.PI * 0.5)) + 4.5) % 4;
-        angleUntilAligned = (float) ((alignTarget * (0.5 * Math.PI)) - invRotationAxisAngle.angle);
+        int alignTarget = (int) floor((invRotationAxisAngle.angle / (PI * 0.5)) + 4.5) % 4;
+        angleUntilAligned = (float) ((alignTarget * (0.5 * PI)) - invRotationAxisAngle.angle);
 
         if (disassembling) {
             Vector3dc pos = this.serverShip.getTransform().getPositionInWorld();
@@ -102,7 +115,7 @@ public class ShipController implements ShipForcesInducer, ServerTickListener {
             physShip.applyInvariantForce(direction);
         }
 
-        if (aligning && Math.abs(angleUntilAligned) > 0.0174533) {
+        if (aligning && abs(angleUntilAligned) > 0.0174533) {
             if (angleUntilAligned < 0.00872665 && angleUntilAligned > 0.0) {
                 angleUntilAligned = 0.00872665F;
             }
@@ -122,14 +135,16 @@ public class ShipController implements ShipForcesInducer, ServerTickListener {
         Vector3dc omega = physShipImpl.getPoseVel().getOmega();
         Vector3dc vel = physShipImpl.getPoseVel().getVel();
 
-        Stabilize.stabilize(
-                physShipImpl,
-                omega,
-                vel,
-                physShipImpl,
-                false,
-                true
-        );
+        if (stabilizer && !timeRotorBlocks.isEmpty()) {
+            Stabilize.stabilize(
+                    physShipImpl,
+                    omega,
+                    vel,
+                    physShipImpl,
+                    false,
+                    true
+            );
+        }
 
         if (this.serverShip != null) {
             SeatedControllingPlayer controllingPlayer = this.serverShip.getAttachment(SeatedControllingPlayer.class);
@@ -145,14 +160,39 @@ public class ShipController implements ShipForcesInducer, ServerTickListener {
                 oldSpeed = 0;
             }
 
+            boolean shouldDoUpForce = false;
+
             if (controlData != null) {
                 applyPlayerControl(controlData, physShipImpl);
                 idealUpwardVel = getPlayerUpwardVel(controlData, mass);
+                shouldDoUpForce = controlData.upImpulse != 0.0;
             }
 
-            double idealUpwardForce = (idealUpwardVel.y() - vel.y() - (GRAVITY)) * mass;
+            double idealUpwardForce = ((antigrav || shouldDoUpForce) && !timeRotorBlocks.isEmpty()) ? ((idealUpwardVel.y() - vel.y() - (GRAVITY)) * mass) : 0;
 
             physShip.applyInvariantForce(new Vector3d(0, max(idealUpwardForce, 0) + vel.y() * -mass, 0));
+
+            // 39.33 m/s = 88 mph
+            double exact_speed = physShipImpl.getPoseVel().getVel().length();
+            this.cspeed = exact_speed;
+            if (exact_speed >= 39.33 && this.space_circuit) {
+                TardisInfo tardisInfo = this.serverShip.getAttachment(TardisInfo.class);
+                if (tardisInfo != null) {
+                    double distanceToTarget = this.serverShip.getTransform().getPositionInWorld().distance(tardisInfo.target_location.getX(), tardisInfo.target_location.getY(), tardisInfo.target_location.getZ());
+                    if (distanceToTarget > 100) {
+                        ShipTeleportDataImpl shipTeleportData = new ShipTeleportDataImpl(
+                                (Vector3dc) new Vector3d(tardisInfo.target_location.getX(), tardisInfo.target_location.getY(), tardisInfo.target_location.getZ()),
+                                JomlUtils.toQuaternion(tardisInfo.target_rotation),
+                                this.serverShip.getVelocity(),
+                                this.serverShip.getOmega(),
+                                VSGameUtilsKt.getDimensionId(tardisInfo.target_level),
+                                1.0
+                        );
+
+                        VSGameUtilsKt.getShipObjectWorld((ServerLevel) tardisInfo.current_level).teleportShip(serverShip, shipTeleportData);
+                    }
+                }
+            }
 
             physShip.setStatic(false);
         }
@@ -196,11 +236,11 @@ public class ShipController implements ShipForcesInducer, ServerTickListener {
 
         // Calculate largest distance for turn speed penalty
         double dist = center.distance(aabb.minX(), center.y(), aabb.minZ());
-        dist = Math.max(dist, center.distance(aabb.minX(), center.y(), aabb.maxZ()));
-        dist = Math.max(dist, center.distance(aabb.maxX(), center.y(), aabb.minZ()));
-        dist = Math.max(dist, center.distance(aabb.maxX(), center.y(), aabb.maxZ()));
+        dist = max(dist, center.distance(aabb.minX(), center.y(), aabb.maxZ()));
+        dist = max(dist, center.distance(aabb.maxX(), center.y(), aabb.minZ()));
+        dist = max(dist, center.distance(aabb.maxX(), center.y(), aabb.maxZ()));
 
-        double largestDistance = Math.max(0.5, Math.min(dist, 4));
+        double largestDistance = max(0.5, min(dist, 4));
 
         double maxLinearAcceleration = 50;
         double maxLinearSpeed = 100 + extraForceAngular;
@@ -209,11 +249,11 @@ public class ShipController implements ShipForcesInducer, ServerTickListener {
         double maxOmegaY = maxLinearSpeed / largestDistance;
         double maxAlphaY = maxLinearAcceleration / largestDistance;
 
-        boolean isBelowMaxTurnSpeed = Math.abs(omega.y()) < maxOmegaY;
+        boolean isBelowMaxTurnSpeed = abs(omega.y()) < maxOmegaY;
 
         double normalizedAlphaYMultiplier = (isBelowMaxTurnSpeed && control.leftImpulse != 0.0f)
                 ? control.leftImpulse
-                : -Math.min(1.0, Math.max(-1.0, omega.y()));
+                : -min(1.0, max(-1.0, omega.y()));
 
         double idealAlphaY = normalizedAlphaYMultiplier * maxAlphaY;
 
@@ -241,7 +281,7 @@ public class ShipController implements ShipForcesInducer, ServerTickListener {
     }
 
     private double smoothingATan(double smoothing, double x) {
-        return Math.atan(x * smoothing) / smoothing;
+        return atan(x * smoothing) / smoothing;
     }
 
     // Limit x to max using ATan
@@ -254,8 +294,27 @@ public class ShipController implements ShipForcesInducer, ServerTickListener {
         double linearMaxMass = 10000;
         double linearMassScaling = 2.0E-4;
         double linearBaseMass = 50;
-        double baseSpeed = 50;
+        double baseSpeed = 0;
+        double maxBaseSpeed = 60;
         double maxCasualSpeed = 100;
+
+        List<TimeRotorBlockEntity> blocksToRemove = new ArrayList<>();
+
+        for (TimeRotorBlockEntity timeRotorBlockEntity : timeRotorBlocks) {
+            if (timeRotorBlockEntity.isRemoved()) {
+                blocksToRemove.add(timeRotorBlockEntity);
+            }
+        }
+
+        for (TimeRotorBlockEntity timeRotorBlockEntity : blocksToRemove) {
+            timeRotorBlocks.remove(timeRotorBlockEntity);
+        }
+
+        for (TimeRotorBlockEntity timeRotorBlockEntity : timeRotorBlocks) {
+            baseSpeed += 13.2 * (abs(timeRotorBlockEntity.getSpeed()) / 64);
+        }
+
+        baseSpeed = min(baseSpeed, maxBaseSpeed);
 
         double scaledMass = physShip.getInertia().getShipMass() * 5;
         Vector3dc vel = physShip.getPoseVel().getVel();
@@ -273,7 +332,7 @@ public class ShipController implements ShipForcesInducer, ServerTickListener {
         );
 
         double maxSpeed = 50;
-        oldSpeed = Math.max(Math.min(oldSpeed * (1 - s) + control.forwardImpulse * s, maxSpeed), -maxSpeed);
+        oldSpeed = max(min(oldSpeed * (1 - s) + control.forwardImpulse * s, maxSpeed), -maxSpeed);
         forwardVector.mul(oldSpeed);
 
         Vector3d playerUpDirection = physShip.getPoseVel().transformDirection(new Vector3d(0.0, 1.0, 0.0));
@@ -285,7 +344,7 @@ public class ShipController implements ShipForcesInducer, ServerTickListener {
 
         if (extraForceLinear != 0.0) {
             // Boost
-            double boost = Math.max((extraForceLinear - 500000 * 2.5) * 0.2, 0.0);
+            double boost = max((extraForceLinear - 500000 * 2.5) * 0.2, 0.0);
             extraForceLinear += (float) (boost + boost * boost * 1.0E-6);
 
             // This is the maximum speed we want to go in any scenario (when not sprinting)
@@ -293,7 +352,7 @@ public class ShipController implements ShipForcesInducer, ServerTickListener {
             Vector3d idealForwardForce = new Vector3d(idealForwardVel).sub(velOrthogonalToPlayerUp).mul(scaledMass);
 
             Vector3d extraForceNeeded = new Vector3d(idealForwardForce).sub(forwardForce);
-            forwardForce.fma(Math.min(extraForceLinear / extraForceNeeded.length(), 1.0), extraForceNeeded);
+            forwardForce.fma(min(extraForceLinear / extraForceNeeded.length(), 1.0), extraForceNeeded);
         }
 
         return forwardForce;

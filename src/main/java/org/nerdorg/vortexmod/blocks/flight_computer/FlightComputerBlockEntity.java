@@ -6,7 +6,9 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -19,27 +21,44 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.network.NetworkDirection;
+import net.minecraftforge.network.PacketDistributor;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Quaterniond;
+import org.joml.Quaterniondc;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
+import org.nerdorg.vortexmod.VortexMod;
 import org.nerdorg.vortexmod.blocks.time_rotor.TimeRotorBlock;
+import org.nerdorg.vortexmod.blocks.types.TardisComponentBlockEntity;
 import org.nerdorg.vortexmod.gui.flight_computer.FlightComputerGuiMenu;
 import org.nerdorg.vortexmod.index.VMBlocks;
+import org.nerdorg.vortexmod.packets.s2c.SyncComputerInfoPacket;
+import org.nerdorg.vortexmod.ship_management.JomlUtils;
 import org.nerdorg.vortexmod.ship_management.ShipAssembler;
 import org.nerdorg.vortexmod.ship_management.ShipController;
 import org.valkyrienskies.core.api.ships.ServerShip;
+import org.valkyrienskies.core.impl.game.ships.PhysShipImpl;
 import org.valkyrienskies.mod.common.VSGameUtilsKt;
 import org.valkyrienskies.mod.common.assembly.ShipAssemblyKt;
 
 import java.util.List;
 import java.util.function.Predicate;
 
-public class FlightComputerBlockEntity extends KineticBlockEntity implements MenuProvider {
+public class FlightComputerBlockEntity extends TardisComponentBlockEntity implements MenuProvider {
 
     public final ContainerData data;
-    private ServerShip serverShip;
-    private ShipController control;
     private boolean shouldDisassembleWhenPossible;
+    public BlockPos currentPos = BlockPos.ZERO;
+    public Vector3d currentRotation = new Vector3d(0, 0 ,0);
+    public BlockPos targetPos = BlockPos.ZERO;
+    public Vector3d targetRotation = new Vector3d(0, 0, 0);
+    public double speed = 0;
+    public float max_stress = 0;
+    public float stress_amount = 0;
+    public boolean assembled = false;
+    public boolean stabilizers = false;
+    public boolean antigrav = false;
 
     public FlightComputerBlockEntity(BlockEntityType<?> typeIn, BlockPos pos, BlockState state) {
         super(typeIn, pos, state);
@@ -68,66 +87,76 @@ public class FlightComputerBlockEntity extends KineticBlockEntity implements Men
     }
 
     @Override
-    public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
-        tooltip.add(Component.literal(spacing).append(Lang.translateDirect("gui.goggles.at_current_speed").withStyle(ChatFormatting.DARK_GRAY)));
-        return true;
-    }
-
-    @Override
     public float calculateStressApplied() {
-        float impact = 16f;
+        float impact = 0.25f;
         this.lastStressApplied = impact;
         return impact;
     }
 
     @Override
-    public void read(CompoundTag compound, boolean clientPacket) {
-        super.read(compound, clientPacket);
-    }
-
-    @Override
-    public void write(CompoundTag compound, boolean clientPacket) {
-        super.write(compound, clientPacket);
-    }
-
-    private boolean firstTickState = true;
-
-    @Override
     public void tick() {
         super.tick();
         if(level.isClientSide()) return;
-        if(firstTickState) firstTick();
-        firstTickState = false;
 
-        if (this.serverShip == null) {
-            updateShipReference((ServerLevel) level, getBlockPos());
-            if (Math.abs(getSpeed()) > 0 && isSpeedRequirementFulfilled()) {
-
-            }
-        }
-        else {
+        if (this.serverShip != null) {
             if (shouldDisassembleWhenPossible && this.control.canDisassemble()) {
                 this.disassemble();
             }
-
-            if (this.control != null) {
-                this.control.serverShip = this.serverShip;
-            }
-
-            if (Math.abs(getSpeed()) > 0 && isSpeedRequirementFulfilled()) {
-
-            }
         }
-    }
 
-    private void updateShipReference(ServerLevel serverLevel, BlockPos pos) {
-        this.serverShip = VSGameUtilsKt.getShipObjectManagingPos(serverLevel, pos.getX(), pos.getY(), pos.getZ());
+        BlockPos currentPos1;
+        Vector3d currentRotation1;
         if (this.serverShip != null) {
-            this.control = this.serverShip.getAttachment(ShipController.class);
+            Vector3dc shipPos = this.serverShip.getTransform().getPositionInWorld();
+            currentPos1 = new BlockPos((int) shipPos.x(), (int) shipPos.y(), (int) shipPos.z());
 
-            if (this.control == null) {
-                this.serverShip.saveAttachment(ShipController.class, new ShipController());
-            }
+            Quaterniondc shipRot = this.serverShip.getTransform().getShipToWorldRotation();
+            currentRotation1 = JomlUtils.toEulerAngles((Quaterniond) shipRot);
+        }
+        else {
+            currentPos1 = this.getBlockPos();
+            currentRotation1 = new Vector3d(0, 0, 0);
+        }
+
+        BlockPos targetPos1;
+        Vector3d targetRotation1;
+        if (this.tardisInfo != null) {
+            targetPos1 = this.tardisInfo.target_location;
+            targetRotation1 = new Vector3d(this.tardisInfo.target_rotation.x(), this.tardisInfo.target_rotation.y(), this.tardisInfo.target_rotation.z());
+        }
+        else {
+            targetPos1 = this.getBlockPos();
+            targetRotation1 = new Vector3d(0, 0, 0);
+        }
+
+        double speed1 = 0;
+        boolean stabilizers1 = false;
+        boolean antigrav1 = false;
+        if (this.control != null) {
+            speed1 = this.control.cspeed;
+            stabilizers1 = this.control.stabilizer;
+            antigrav1 = this.control.antigrav;
+        }
+
+        if (this.level.getGameTime() % 10 == 0) {
+            VortexMod.Network.send(PacketDistributor.ALL.noArg(),
+                    new SyncComputerInfoPacket(
+                            this.getBlockPos(),
+                            currentPos1,
+                            currentRotation1.x(),
+                            currentRotation1.y(),
+                            currentRotation1.z(),
+                            targetPos1,
+                            targetRotation1.x(),
+                            targetRotation1.y(),
+                            targetRotation1.z(),
+                            speed1,
+                            this.capacity,
+                            this.stress,
+                            this.serverShip != null,
+                            stabilizers1,
+                            antigrav1
+                    ));
         }
     }
 
@@ -150,10 +179,6 @@ public class FlightComputerBlockEntity extends KineticBlockEntity implements Men
     public void remove() {
         super.remove();
     }
-
-    public void firstTick() {
-
-    };
 
     @Override
     public Component getDisplayName() {

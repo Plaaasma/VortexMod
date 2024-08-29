@@ -32,6 +32,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
+import org.nerdorg.vortexmod.blocks.types.TardisComponentBlockEntity;
 import org.nerdorg.vortexmod.gui.flight_computer.FlightComputerGuiMenu;
 import org.nerdorg.vortexmod.index.VMBlocks;
 import org.nerdorg.vortexmod.ship_management.ShipAssembler;
@@ -46,10 +47,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
-public class FlightControllerBlockEntity extends KineticBlockEntity {
+public class FlightControllerBlockEntity extends TardisComponentBlockEntity {
 
-    private ServerShip serverShip;
-    private ShipController control;
     private List<ShipMountingEntity> seats = new ArrayList<ShipMountingEntity>();
 
     public FlightControllerBlockEntity(BlockEntityType<?> typeIn, BlockPos pos, BlockState state) {
@@ -57,73 +56,22 @@ public class FlightControllerBlockEntity extends KineticBlockEntity {
     }
 
     @Override
-    public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
-        tooltip.add(Component.literal(spacing).append(Lang.translateDirect("gui.goggles.at_current_speed").withStyle(ChatFormatting.DARK_GRAY)));
-        return true;
-    }
-
-    @Override
     public float calculateStressApplied() {
-        float impact = 32f;
+        float impact = 0.5f;
         this.lastStressApplied = impact;
         return impact;
     }
 
     @Override
-    public void read(CompoundTag compound, boolean clientPacket) {
-        super.read(compound, clientPacket);
-    }
-
-    @Override
-    public void write(CompoundTag compound, boolean clientPacket) {
-        super.write(compound, clientPacket);
-    }
-
-    private boolean firstTickState = true;
-
-    @Override
     public void tick() {
         super.tick();
         if(level.isClientSide()) return;
-        if(firstTickState) firstTick();
-        firstTickState = false;
-
-        if (this.serverShip == null) {
-            updateShipReference((ServerLevel) level, getBlockPos());
-            if (Math.abs(getSpeed()) > 0 && isSpeedRequirementFulfilled()) {
-
-            }
-        }
-        else {
-            if (this.control != null) {
-                this.control.serverShip = this.serverShip;
-            }
-
-            if (Math.abs(getSpeed()) > 0 && isSpeedRequirementFulfilled()) {
-
-            }
-        }
-    }
-
-    private void updateShipReference(ServerLevel serverLevel, BlockPos pos) {
-        this.serverShip = VSGameUtilsKt.getShipObjectManagingPos(serverLevel, pos.getX(), pos.getY(), pos.getZ());
-        if (this.serverShip != null) {
-            this.control = this.serverShip.getAttachment(ShipController.class);
-
-            if (this.control == null) {
-                this.control = new ShipController();
-                this.control.serverShip = this.serverShip;
-                this.serverShip.saveAttachment(ShipController.class, this.control);
-            }
-
-            this.control.serverShip = this.serverShip;
-        }
     }
 
     public ShipMountingEntity spawnSeat(BlockPos blockPos, BlockState state, ServerLevel level) {
         // Get the direction the block is facing
         Direction facing = Direction.get(Direction.AxisDirection.POSITIVE, state.getValue(HorizontalAxisKineticBlock.HORIZONTAL_AXIS));
-        BlockPos newPos = blockPos;
+        BlockPos newPos = blockPos.relative(facing.getOpposite());
 
         BlockState newState = level.getBlockState(newPos);
         VoxelShape newShape = newState.getShape(level, newPos);
@@ -163,6 +111,11 @@ public class FlightControllerBlockEntity extends KineticBlockEntity {
     }
 
     public boolean startRiding(Player player, boolean force, BlockPos blockPos, BlockState state, ServerLevel level) {
+        if (!(Math.abs(getSpeed()) > 0 && isSpeedRequirementFulfilled())) {
+            player.displayClientMessage(Component.literal("You must input a speed of 32 rpm to use this.").withStyle(ChatFormatting.RED), true);
+            return false;
+        }
+
         for (int i = seats.size() - 1; i >= 0; i--) {
             ShipMountingEntity seat = seats.get(i);
             if (!seat.isVehicle()) {
@@ -208,8 +161,4 @@ public class FlightControllerBlockEntity extends KineticBlockEntity {
     public void remove() {
         super.remove();
     }
-
-    public void firstTick() {
-
-    };
 }

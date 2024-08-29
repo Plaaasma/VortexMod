@@ -10,12 +10,15 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
 import net.minecraft.core.Vec3i;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -43,9 +46,11 @@ import org.nerdorg.vortexmod.shapes.VMShapes;
 import org.valkyrienskies.mod.common.ValkyrienSkiesMod;
 import org.valkyrienskies.mod.common.entity.ShipMountingEntity;
 
+import java.util.List;
+
 public class FlightControllerBlock extends HorizontalAxisKineticBlock implements IBE<FlightControllerBlockEntity>, IRotate {
 
-    public static final VoxelShaper CONTROLLER_SHAPE = VMShapes.shape(4, 0, 4, 12, 16, 12).forHorizontalAxis();
+    public static final VoxelShaper CONTROLLER_SHAPE = VMShapes.shape(0, 0, 0, 16, 10, 16).forHorizontalAxis();
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
@@ -68,8 +73,10 @@ public class FlightControllerBlock extends HorizontalAxisKineticBlock implements
     @Override
     public InteractionResult use(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer, InteractionHand pHand, BlockHitResult pHit) {
         if (pLevel instanceof ServerLevel serverLevel) {
-            FlightControllerBlockEntity entity = (FlightControllerBlockEntity) pLevel.getBlockEntity(pPos);
-            entity.startRiding(pPlayer, true, pPos, pState, serverLevel);
+            if (!pPlayer.isPassenger()) {
+                FlightControllerBlockEntity entity = (FlightControllerBlockEntity) pLevel.getBlockEntity(pPos);
+                entity.startRiding(pPlayer, true, pPos, pState, serverLevel);
+            }
         }
 
         return InteractionResult.SUCCESS;

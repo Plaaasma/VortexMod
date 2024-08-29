@@ -10,6 +10,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -21,53 +22,47 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.energy.IEnergyStorage;
+import org.joml.Vector3d;
+import org.joml.Vector3dc;
+import org.nerdorg.vortexmod.blocks.types.TardisComponentBlockEntity;
 import org.nerdorg.vortexmod.index.VMBlocks;
+import org.nerdorg.vortexmod.ship_management.ShipController;
+import org.valkyrienskies.core.api.ships.ServerShip;
+import org.valkyrienskies.mod.common.VSGameUtilsKt;
 
-public class TimeRotorBlockEntity extends KineticBlockEntity {
+public class TimeRotorBlockEntity extends TardisComponentBlockEntity {
 
     public TimeRotorBlockEntity(BlockEntityType<?> typeIn, BlockPos pos, BlockState state) {
         super(typeIn, pos, state);
     }
 
     @Override
-    public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
-        tooltip.add(Component.literal(spacing).append(Lang.translateDirect("gui.goggles.at_current_speed").withStyle(ChatFormatting.DARK_GRAY)));
-        return true;
-    }
-
-    @Override
     public float calculateStressApplied() {
-        float impact = 64f;
+        float impact = 1f;
         this.lastStressApplied = impact;
         return impact;
     }
 
     @Override
-    public void read(CompoundTag compound, boolean clientPacket) {
-        super.read(compound, clientPacket);
-    }
-
-    @Override
-    public void write(CompoundTag compound, boolean clientPacket) {
-        super.write(compound, clientPacket);
-    }
-
-    private boolean firstTickState = true;
-
-    @Override
     public void tick() {
         super.tick();
         if(level.isClientSide()) return;
-        if(firstTickState) firstTick();
-        firstTickState = false;
+        if (this.serverShip != null) {
+            if (Math.abs(getSpeed()) > 0 && isSpeedRequirementFulfilled()) {
+                if (this.control != null) {
+                    if (!this.control.timeRotorBlocks.contains(this))
+                        this.control.timeRotorBlocks.add(this);
+                }
+                if (!this.getBlockState().getValue(TimeRotorBlock.ENABLED))
+                    level.setBlock(getBlockPos(), this.getBlockState().setValue(TimeRotorBlock.ENABLED, true), 3);
+            } else {
+                if (this.control != null) {
+                    this.control.timeRotorBlocks.remove(this);
+                }
 
-        if(Math.abs(getSpeed()) > 0 && isSpeedRequirementFulfilled()) {
-            if (!this.getBlockState().getValue(TimeRotorBlock.ENABLED))
-                level.setBlock(getBlockPos(), this.getBlockState().setValue(TimeRotorBlock.ENABLED, true), 3);
-        }
-        else {
-            if (this.getBlockState().getValue(TimeRotorBlock.ENABLED))
-                level.setBlock(getBlockPos(), this.getBlockState().setValue(TimeRotorBlock.ENABLED, false), 3);
+                if (this.getBlockState().getValue(TimeRotorBlock.ENABLED))
+                    level.setBlock(getBlockPos(), this.getBlockState().setValue(TimeRotorBlock.ENABLED, false), 3);
+            }
         }
     }
 
@@ -90,8 +85,4 @@ public class TimeRotorBlockEntity extends KineticBlockEntity {
     public void remove() {
         super.remove();
     }
-
-    public void firstTick() {
-
-    };
 }
