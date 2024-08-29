@@ -6,7 +6,7 @@
 
   "vortexmod.ponder.time_rotor.header": "Powering the TARDIS with a time rotor!",
   "vortexmod.ponder.time_rotor.text_1": "The Time Rotor is responsible for providing thrust and stabilizing the TARDIS.",
-  "vortexmod.ponder.time_rotor.text_2": "It requires at least 32 RPM to operate, though increasing the RPM makes it stronger.",
+  "vortexmod.ponder.time_rotor.text_2": "It requires atleast 32 RPM to operate, though increasing the RPM makes it stronger.",
   "vortexmod.ponder.time_rotor.text_3": "You can have multiple of them in one TARDIS to increase the strength as well.",
 
   "vortexmod.ponder.flight_computer.header": "Managing the TARDIS with the Flight Computer!",
