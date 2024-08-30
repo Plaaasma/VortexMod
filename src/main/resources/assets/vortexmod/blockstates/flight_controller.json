@@ -1,11 +1,36 @@
 {
   "variants": {
-    "axis=x": {
+    "enabled=false,facing=north": {
+      "model": "vortexmod:block/flight_controller/block",
+      "y": 180
+    },
+    "enabled=false,facing=south": {
+      "model": "vortexmod:block/flight_controller/block",
+      "y": 0
+    },
+    "enabled=false,facing=west": {
       "model": "vortexmod:block/flight_controller/block",
       "y": 90
     },
-    "axis=z": {
-      "model": "vortexmod:block/flight_controller/block"
+    "enabled=false,facing=east": {
+      "model": "vortexmod:block/flight_controller/block",
+      "y": 270
+    },
+    "enabled=true,facing=north": {
+      "model": "vortexmod:block/flight_controller/block_enabled",
+      "y": 180
+    },
+    "enabled=true,facing=south": {
+      "model": "vortexmod:block/flight_controller/block_enabled",
+      "y": 0
+    },
+    "enabled=true,facing=west": {
+      "model": "vortexmod:block/flight_controller/block_enabled",
+      "y": 90
+    },
+    "enabled=true,facing=east": {
+      "model": "vortexmod:block/flight_controller/block_enabled",
+      "y": 270
     }
   }
 }

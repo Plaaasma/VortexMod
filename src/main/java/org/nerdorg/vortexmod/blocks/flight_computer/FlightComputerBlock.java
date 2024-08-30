@@ -42,7 +42,7 @@ public class FlightComputerBlock extends DirectionalKineticBlock implements IBE<
 
     public static final BooleanProperty ENABLED = BlockStateProperties.ENABLED;
 
-    public static final VoxelShaper COMPUTER_SHAPE = VMShapes.shape(0, 1, 0, 16, 16, 16).forDirectional();
+    public static final VoxelShaper COMPUTER_SHAPE = VMShapes.shape(0, 0, 0, 16, 16, 16).forDirectional();
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
@@ -107,6 +107,11 @@ public class FlightComputerBlock extends DirectionalKineticBlock implements IBE<
     public Axis getRotationAxis(BlockState state) {
         return state.getValue(FACING)
                 .getAxis();
+    }
+
+    @Override
+    public int getLightEmission(BlockState state, BlockGetter level, BlockPos pos) {
+        return 4;
     }
 
     @Override

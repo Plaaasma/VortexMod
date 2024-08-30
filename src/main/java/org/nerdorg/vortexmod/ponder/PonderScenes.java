@@ -30,12 +30,14 @@ public class PonderScenes {
         }
 
         scene.idle(10);
+        scene.addKeyframe();
         scene.overlay.showText(50)
                 .text("The Time Rotor is responsible for providing thrust and stabilizing the TARDIS.")
                 .placeNearTarget()
                 .pointAt(util.vector.topOf(rotor1));
         scene.idle(60);
 
+        scene.addKeyframe();
         scene.overlay.showText(50)
                 .text("It requires atleast 32 RPM to operate, though increasing the RPM makes it stronger.")
                 .placeNearTarget()
@@ -48,6 +50,7 @@ public class PonderScenes {
             scene.world.showSection(util.select.position(i, 4, 2), Direction.DOWN);
         }
 
+        scene.addKeyframe();
         scene.overlay.showText(100)
                 .text("You can have multiple of them in one TARDIS to increase the strength as well.")
                 .placeNearTarget()
@@ -71,18 +74,21 @@ public class PonderScenes {
         }
 
         scene.idle(10);
+        scene.addKeyframe();
         scene.overlay.showText(50)
                 .text("The Flight Computer is essential for assembling and disassembling the TARDIS.")
                 .placeNearTarget()
                 .pointAt(util.vector.topOf(computer));
         scene.idle(60);
 
+        scene.addKeyframe();
         scene.overlay.showText(50)
                 .text("It displays and controls all the variables in the TARDIS such as the target location.")
                 .placeNearTarget()
                 .pointAt(util.vector.topOf(computer));
         scene.idle(60);
 
+        scene.addKeyframe();
         scene.overlay.showText(50)
                 .text("It requires atleast 32 RPM to operate.")
                 .placeNearTarget()
@@ -106,18 +112,21 @@ public class PonderScenes {
         }
 
         scene.idle(10);
+        scene.addKeyframe();
         scene.overlay.showText(50)
                 .text("The Flight Controller is the actual control panel for the TARDIS.")
                 .placeNearTarget()
                 .pointAt(util.vector.topOf(controller));
         scene.idle(60);
 
+        scene.addKeyframe();
         scene.overlay.showText(50)
                 .text("Right clicking it will mount you onto the TARDIS where you can fly using your movement keys, your jump bind, and your descent bind (Different than crouch).")
                 .placeNearTarget()
                 .pointAt(util.vector.topOf(controller));
         scene.idle(120);
 
+        scene.addKeyframe();
         scene.overlay.showText(50)
                 .text("It requires atleast 32 RPM to operate.")
                 .placeNearTarget()
@@ -142,12 +151,14 @@ public class PonderScenes {
         }
 
         scene.idle(10);
+        scene.addKeyframe();
         scene.overlay.showText(50)
                 .text("The Space Circuit allows you to teleport to the target coords once you get 39.3 m/s (88 mph).")
                 .placeNearTarget()
                 .pointAt(util.vector.topOf(circuit));
         scene.idle(60);
 
+        scene.addKeyframe();
         scene.world.cycleBlockProperty(lever, LeverBlock.POWERED);
         scene.world.cycleBlockProperty(circuit, SpaceCircuitBlock.POWERED);
         scene.overlay.showText(50)
@@ -156,6 +167,7 @@ public class PonderScenes {
                 .pointAt(util.vector.topOf(circuit));
         scene.idle(60);
 
+        scene.addKeyframe();
         scene.world.cycleBlockProperty(lever, LeverBlock.POWERED);
         scene.world.cycleBlockProperty(circuit, SpaceCircuitBlock.POWERED);
         scene.overlay.showText(50)

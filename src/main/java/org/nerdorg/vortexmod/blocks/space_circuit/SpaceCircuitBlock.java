@@ -43,6 +43,8 @@ public class SpaceCircuitBlock extends DirectionalKineticBlock implements IBE<Sp
 
     public static final VoxelShaper CIRCUIT_SHAPE = VMShapes.shape(0, 0, 0, 16, 16, 16).forDirectional();
 
+    private int light = 4;
+
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(POWERED);
@@ -69,6 +71,18 @@ public class SpaceCircuitBlock extends DirectionalKineticBlock implements IBE<Sp
         if (isPowered != state.getValue(POWERED)) {
             world.setBlock(pos, state.setValue(POWERED, isPowered), 3);
         }
+
+        if (isPowered) {
+            this.light = 15;
+        }
+        else {
+            this.light = 4;
+        }
+    }
+
+    @Override
+    public int getLightEmission(BlockState state, BlockGetter level, BlockPos pos) {
+        return this.light;
     }
 
     @Override

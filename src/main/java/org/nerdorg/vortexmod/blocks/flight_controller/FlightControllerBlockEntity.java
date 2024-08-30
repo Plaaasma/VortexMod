@@ -1,6 +1,7 @@
 package org.nerdorg.vortexmod.blocks.flight_controller;
 
 import com.simibubi.create.content.kinetics.base.HorizontalAxisKineticBlock;
+import com.simibubi.create.content.kinetics.base.HorizontalKineticBlock;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
 import com.simibubi.create.foundation.utility.Lang;
 import net.minecraft.ChatFormatting;
@@ -32,6 +33,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
+import org.nerdorg.vortexmod.blocks.time_rotor.TimeRotorBlock;
 import org.nerdorg.vortexmod.blocks.types.TardisComponentBlockEntity;
 import org.nerdorg.vortexmod.gui.flight_computer.FlightComputerGuiMenu;
 import org.nerdorg.vortexmod.index.VMBlocks;
@@ -66,11 +68,29 @@ public class FlightControllerBlockEntity extends TardisComponentBlockEntity {
     public void tick() {
         super.tick();
         if(level.isClientSide()) return;
+        if (!this.seats.isEmpty()) {
+            boolean has_passenger = false;
+            for (ShipMountingEntity shipMountingEntity : this.seats) {
+                if (shipMountingEntity.hasControllingPassenger()) {
+                    has_passenger = true;
+                    break;
+                }
+            }
+
+            if (has_passenger) {
+                if (!this.getBlockState().getValue(FlightControllerBlock.ENABLED))
+                    level.setBlock(getBlockPos(), this.getBlockState().setValue(FlightControllerBlock.ENABLED, true), 3);
+            }
+            else {
+                if (this.getBlockState().getValue(FlightControllerBlock.ENABLED))
+                    level.setBlock(getBlockPos(), this.getBlockState().setValue(FlightControllerBlock.ENABLED, false), 3);
+            }
+        }
     }
 
     public ShipMountingEntity spawnSeat(BlockPos blockPos, BlockState state, ServerLevel level) {
         // Get the direction the block is facing
-        Direction facing = Direction.get(Direction.AxisDirection.POSITIVE, state.getValue(HorizontalAxisKineticBlock.HORIZONTAL_AXIS));
+        Direction facing =  state.getValue(HorizontalKineticBlock.HORIZONTAL_FACING);
         BlockPos newPos = blockPos.relative(facing.getOpposite());
 
         BlockState newState = level.getBlockState(newPos);
@@ -97,7 +117,7 @@ public class FlightControllerBlockEntity extends TardisComponentBlockEntity {
             Vector3d seatEntityPos = new Vector3d(newPos.getX() + 0.5, (newPos.getY() - 0.5) + height, newPos.getZ() + 0.5);
             entity.moveTo(seatEntityPos.x(), seatEntityPos.y(), seatEntityPos.z());
 
-            Vec3i normalVec = Direction.get(Direction.AxisDirection.POSITIVE, state.getValue(HorizontalAxisKineticBlock.HORIZONTAL_AXIS)).getNormal();
+            Vec3i normalVec = state.getValue(HorizontalKineticBlock.HORIZONTAL_FACING).getNormal();
 
             entity.lookAt(EntityAnchorArgument.Anchor.EYES,
                     new Vec3(normalVec.getX(), normalVec.getY(), normalVec.getZ()).add(entity.position())
@@ -131,10 +151,7 @@ public class FlightControllerBlockEntity extends TardisComponentBlockEntity {
 
         if (ride) {
             if (control != null) {
-                Direction facing = Direction.get(Direction.AxisDirection.POSITIVE, state.getValue(HorizontalAxisKineticBlock.HORIZONTAL_AXIS));
-
                 control.seatedPlayer = player;
-                this.serverShip.saveAttachment(SeatedControllingPlayer.class, new SeatedControllingPlayer(facing));
             }
             seats.add(seat);
         }

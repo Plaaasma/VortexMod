@@ -69,6 +69,11 @@ public class TimeRotorBlock extends DirectionalKineticBlock implements IBE<TimeR
     }
 
     @Override
+    public int getLightEmission(BlockState state, BlockGetter level, BlockPos pos) {
+        return 15;
+    }
+
+    @Override
     public boolean hasShaftTowards(LevelReader world, BlockPos pos, BlockState state, Direction face) {
         return face == state.getValue(FACING) || face == state.getValue(FACING).getOpposite();
     }

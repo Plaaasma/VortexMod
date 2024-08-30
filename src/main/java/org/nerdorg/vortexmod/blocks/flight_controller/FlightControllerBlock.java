@@ -2,6 +2,7 @@ package org.nerdorg.vortexmod.blocks.flight_controller;
 
 import com.simibubi.create.content.kinetics.base.DirectionalKineticBlock;
 import com.simibubi.create.content.kinetics.base.HorizontalAxisKineticBlock;
+import com.simibubi.create.content.kinetics.base.HorizontalKineticBlock;
 import com.simibubi.create.content.kinetics.base.IRotate;
 import com.simibubi.create.foundation.block.IBE;
 import com.simibubi.create.foundation.utility.VoxelShaper;
@@ -40,6 +41,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3d;
+import org.nerdorg.vortexmod.VortexMod;
 import org.nerdorg.vortexmod.blocks.flight_computer.FlightComputerBlockEntity;
 import org.nerdorg.vortexmod.index.VMBlockEntities;
 import org.nerdorg.vortexmod.shapes.VMShapes;
@@ -48,26 +50,33 @@ import org.valkyrienskies.mod.common.entity.ShipMountingEntity;
 
 import java.util.List;
 
-public class FlightControllerBlock extends HorizontalAxisKineticBlock implements IBE<FlightControllerBlockEntity>, IRotate {
+public class FlightControllerBlock extends HorizontalKineticBlock implements IBE<FlightControllerBlockEntity>, IRotate {
 
-    public static final VoxelShaper CONTROLLER_SHAPE = VMShapes.shape(0, 0, 0, 16, 10, 16).forHorizontalAxis();
+    public static final BooleanProperty ENABLED = BlockStateProperties.ENABLED;
+
+    public static final VoxelShaper CONTROLLER_SHAPE = VMShapes.shape(0, 0, 0, 16, 10, 16).forHorizontal(Direction.DOWN);
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+        builder.add(ENABLED);
         super.createBlockStateDefinition(builder);
     }
 
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter worldIn, BlockPos pos, CollisionContext context) {
-        return CONTROLLER_SHAPE.get(state.getValue(HORIZONTAL_AXIS));
+        return CONTROLLER_SHAPE.get(state.getValue(HORIZONTAL_FACING));
+    }
+
+    @Override
+    public int getLightEmission(BlockState state, BlockGetter level, BlockPos pos) {
+        return 4;
     }
 
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
-        Axis preferredAxis = getPreferredHorizontalAxis(context);
-        if (preferredAxis != null)
-            return this.defaultBlockState().setValue(HORIZONTAL_AXIS, preferredAxis);
-        return this.defaultBlockState().setValue(HORIZONTAL_AXIS, context.getHorizontalDirection().getClockWise().getAxis());
+        return this.defaultBlockState()
+                .setValue(HORIZONTAL_FACING, context.getHorizontalDirection())
+                .setValue(ENABLED, false);
     }
 
     @Override
@@ -89,6 +98,7 @@ public class FlightControllerBlock extends HorizontalAxisKineticBlock implements
 
     public FlightControllerBlock(Properties properties) {
         super(properties);
+        this.registerDefaultState(this.stateDefinition.any().setValue(ENABLED, Boolean.FALSE));
     }
 
     @Override
@@ -98,7 +108,7 @@ public class FlightControllerBlock extends HorizontalAxisKineticBlock implements
 
     @Override
     public Axis getRotationAxis(BlockState state) {
-        return state.getValue(HORIZONTAL_AXIS);
+        return state.getValue(HORIZONTAL_FACING).getClockWise().getAxis();
     }
 
     @Override

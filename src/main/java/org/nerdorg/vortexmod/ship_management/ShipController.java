@@ -32,8 +32,8 @@ public class ShipController implements ShipForcesInducer, ServerTickListener {
     public boolean aligning;
     public boolean disassembling;
     public boolean space_circuit;
-    public boolean antigrav;
-    public boolean stabilizer;
+    public boolean antigrav = true;
+    public boolean stabilizer = true;
     public double cspeed;
 
     private float extraForceLinear = 0;

@@ -95,16 +95,17 @@ public class FlightComputerGuiScreen extends AbstractContainerScreen<FlightCompu
 
         NumberFormat nf = new DecimalFormat("#.#");
 
-        pGuiGraphics.drawCenteredString(this.font, "Current Pos: " + this.getMenu().blockEntity.currentPos.toShortString() + " | Rotation: " + this.getMenu().blockEntity.currentRotation.toString(nf),
+
+        pGuiGraphics.drawCenteredString(this.font, "Speed: " + String.format("%.2f", this.getMenu().blockEntity.speed) + " m/s" + " | " + String.format("%.2f", this.getMenu().blockEntity.speed * 2.23694) + " mph",
                 i, j - 90, ChatFormatting.GRAY.getColor());
 
-        pGuiGraphics.drawCenteredString(this.font, "Target Pos: " + this.getMenu().blockEntity.targetPos.toShortString() + " | Rotation: " + this.getMenu().blockEntity.targetRotation.toString(nf),
+        pGuiGraphics.drawCenteredString(this.font, "Stress: " + String.format("%.2f", (this.getMenu().blockEntity.stress_amount / this.getMenu().blockEntity.max_stress) * 100) + "% (" + this.getMenu().blockEntity.stress_amount + "/" + this.getMenu().blockEntity.max_stress + ")",
                 i, j - 80, ChatFormatting.GRAY.getColor());
 
-        pGuiGraphics.drawCenteredString(this.font, "Speed: " + String.format("%.2f", this.getMenu().blockEntity.speed) + " m/s",
+        pGuiGraphics.drawCenteredString(this.font, "Target Pos: " + this.getMenu().blockEntity.targetPos.toShortString() + " | Rotation: " + this.getMenu().blockEntity.targetRotation.toString(nf),
                 i, j - 70, ChatFormatting.GRAY.getColor());
 
-        pGuiGraphics.drawCenteredString(this.font, "Stress: " + String.format("%.2f", (this.getMenu().blockEntity.stress_amount / this.getMenu().blockEntity.max_stress) * 100) + "% (" + this.getMenu().blockEntity.stress_amount + "/" + this.getMenu().blockEntity.max_stress + ")",
+        pGuiGraphics.drawCenteredString(this.font, "Current Pos: " + this.getMenu().blockEntity.currentPos.toShortString() + " | Rotation: " + this.getMenu().blockEntity.currentRotation.toString(nf),
                 i, j - 60, ChatFormatting.GRAY.getColor());
 
         this.targetX.setTooltip(Tooltip.create(Component.literal("Target X Coordinate")));
