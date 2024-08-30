@@ -61,10 +61,10 @@ public class Config {
         // PHYSICS
         COMMON_BUILDER.comment("Physics Settings").push(CATEGORY_PHYSICS);
         DESCEND_SPEED = COMMON_BUILDER.comment("The speed at which you descend when holding the descend key.")
-                .defineInRange("descend_speed", 8, 0, Double.MAX_VALUE);
+                .defineInRange("descend_speed", 16, 0, Double.MAX_VALUE);
 
         ASCEND_SPEED = COMMON_BUILDER.comment("The speed at which you ascend when holding the ascend key.")
-                .defineInRange("ascend_speed", 4, 0, Double.MAX_VALUE);
+                .defineInRange("ascend_speed", 8, 0, Double.MAX_VALUE);
 
         TURN_ACCELERATION = COMMON_BUILDER.comment("The acceleration of how quickly you turn.")
                 .defineInRange("turn_acceleration", 50, 0, Double.MAX_VALUE);
